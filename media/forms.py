@@ -6,6 +6,7 @@ from .services import MediaFactory
 class MediaForm(forms.Form):
     MEDIA_TYPES = [
         ('book', 'Книга'),
+        ('movie', 'Фильм'),
         ('audiobook', 'Аудиокнига'),
     ]
 
@@ -21,6 +22,10 @@ class MediaForm(forms.Form):
     # Поля для книг
     isbn = forms.CharField(max_length=20, required=False, label='ISBN')
     page_count = forms.IntegerField(required=False, label='Количество страниц', min_value=1)
+
+    # Поля для фильмов
+    movie_duration = forms.IntegerField(required=False, label='Длительность фильма (минуты)', min_value=1)
+    format = forms.CharField(max_length=10, required=False, label='Формат')
 
     # Поля для аудиокниг
     narrator = forms.CharField(max_length=100, required=False, label='Чтец')
@@ -40,6 +45,12 @@ class MediaForm(forms.Form):
                 self.add_error('isbn', 'ISBN обязателен для книг')
             if not cleaned_data.get('page_count'):
                 self.add_error('page_count', 'Количество страниц обязательно для книг')
+
+        if media_type == 'movie':
+            if not cleaned_data.get('movie_duration'):
+                self.add_error('movie_duration', 'Продолжительность обязательна для фильмов')
+            if not cleaned_data.get('format'):
+                self.add_error('format', 'Формат обязателен для фильмов')
 
         elif media_type == 'audiobook':
             if not cleaned_data.get('narrator'):
@@ -64,6 +75,11 @@ class MediaForm(forms.Form):
             media_data.update({
                 'isbn': self.cleaned_data['isbn'],
                 'page_count': self.cleaned_data['page_count']
+            })
+        elif media_type == 'movie':
+            media_data.update({
+                'duration': self.cleaned_data['movie_duration'],
+                'format': self.cleaned_data['format']
             })
         elif media_type == 'audiobook':
             media_data.update({
